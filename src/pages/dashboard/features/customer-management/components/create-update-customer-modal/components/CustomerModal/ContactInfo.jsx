@@ -1,10 +1,9 @@
-import React from 'react'
 import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
+import React, { useState } from 'react'
+import socialApi from '../../../../../../../../apis/socialApi'
 import { CustomInput } from '../../../../../../components/CustomInput'
 import { CustomSelect } from '../../../../../../components/CustomSelect'
-import socialApi from '../../../../../../../../apis/socialApi'
-import { useState } from 'react'
 
 const ContactInfoSection = ({
   formData,
@@ -81,8 +80,6 @@ const ContactInfoSection = ({
                 value={formData.detailed_info}
                 onChange={onChangeField('detailed_info')}
                 placeholder="Nhập link mạng xã hội"
-                error={!!errors.detailed_info}
-                helperText={errors.detailed_info}
               />
             </Grid>
           </Grid>

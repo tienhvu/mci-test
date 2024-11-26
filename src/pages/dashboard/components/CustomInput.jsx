@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react'
-import { TextField, FormControl, Typography, InputAdornment } from '@mui/material'
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import { FormControl, InputAdornment, TextField, Typography } from '@mui/material'
+import React, { useRef, useState } from 'react'
 
 export const CustomInput = ({
   label,
@@ -22,9 +21,10 @@ export const CustomInput = ({
     setIsBlurred(true)
   }
 
-  const handleShowDatePicker = () => {
-    if (inputRef.current) {
-      inputRef.current.showPicker()
+  const handleShowDatePicker = (e) => {
+    if (inputRef.current && type === 'date') {
+      e.preventDefault()
+      inputRef.current.focus()
     }
   }
 
@@ -50,11 +50,17 @@ export const CustomInput = ({
         fullWidth={fullWidth}
         onBlur={handleBlur}
         InputProps={{
-          disableUnderline: true, 
+          disableUnderline: true
         }}
         error={!!error}
         helperText={helperText}
-        onClick={type === 'date' ? handleShowDatePicker : undefined}
+        onClick={handleShowDatePicker}
+        onFocus={(e) => {
+          if (type === 'date') {
+            e.target.showPicker()
+          }
+        }}
+
         sx={{
           '& .MuiInputBase-root': {
             fontSize: '14px',

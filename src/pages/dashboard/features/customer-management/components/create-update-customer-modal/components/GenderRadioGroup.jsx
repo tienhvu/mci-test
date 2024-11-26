@@ -9,11 +9,11 @@ const GenderRadioGroup = ({ value, onChange }) => {
   }
   const radioStyle = {
     '& .MuiSvgIcon-root': {
-      fontSize: {xs: '16px',sm: '20px', lg: '16px'},
+      fontSize: { xs: '16px', sm: '20px', lg: '16px' }
     },
     '&.Mui-checked': {
       '& .MuiSvgIcon-root': {
-        color: '#2769B1',
+        color: '#2769B1'
       }
     }
   }
@@ -28,7 +28,7 @@ const GenderRadioGroup = ({ value, onChange }) => {
   }
 
   return (
-    <FormControl sx={{ display: 'flex', alignItems: 'center', flexDirection: 'row', justifyContent:{ md:'center' }}}>
+    <FormControl sx={{ display: 'flex', alignItems: 'center', flexDirection: 'row', justifyContent:{ md:'center' } }}>
       <FormLabel
         id="gender-label"
         sx={formLabelStyle}
@@ -50,13 +50,13 @@ const GenderRadioGroup = ({ value, onChange }) => {
           sx={formControlLabelStyle}
         />
         <FormControlLabel
-          value="Nu"
+          value="Nữ"
           control={<Radio sx={radioStyle} />}
           label="Nữ"
           sx={formControlLabelStyle}
         />
         <FormControlLabel
-          value="Khac"
+          value="Khác"
           control={<Radio sx={radioStyle} />}
           label="Khác"
           sx={formControlLabelStyle}

@@ -22,10 +22,10 @@ import DetailedInfoSection from './components/CustomerModal/DetailInfo'
 import customerApi from '../../../../../../apis/customerApi'
 
 
-export default function CustomerModal({ open, onClose, handleSubmitData }) {
+export default function CustomerModal({ open, onClose }) {
   const initialFormState = {
     full_name: '',
-    gender: '',
+    gender: 'Nam',
     date_of_birth: null,
     phone_number: '',
     email: '',
@@ -41,7 +41,6 @@ export default function CustomerModal({ open, onClose, handleSubmitData }) {
     address: '',
     follow_up_date: null,
     follow_down_date: null,
-    follow_up_entries: [],
     comment : {
       title: '',
       time: null,
@@ -113,39 +112,61 @@ export default function CustomerModal({ open, onClose, handleSubmitData }) {
   }, [validateField])
 
 
+  const handleCommentsUpdate = (updatedComments) => {
+    setFormData(prev => ({
+      ...prev,
+      comments: updatedComments
+    }))
+    setIsDirty(true)
+  }
+
+
   const handleSubmit = async () => {
     try {
-      await customerSchema.validate(formData, { abortEarly: false })
+      console.log('Submitting form data:', formData)
 
-      const transformedData = {
-        ...formData,
-        follow_ups: formData.follow_up_entries.map(entry => ({
-          date: entry.date,
-          result: entry.result,
-          status: entry.status
-        }))
+
+      try {
+        await customerSchema.validate(formData, { abortEarly: false })
+        console.log('Validation passed successfully')
+      } catch (validationError) {
+        console.error('Validation Errors:', validationError.errors)
+        console.error('Validation Inner Errors:', validationError.inner)
+
+        const newErrors = {}
+        validationError.inner.forEach(err => {
+          console.error(`Field: ${err.path}, Error: ${err.message}`)
+          newErrors[err.path] = err.message
+        })
+        setErrors(newErrors)
+        return
       }
 
 
-      await customerApi.addCustomer(transformedData)
+      console.log('Transformed Data:', formData)
 
-      setFormData(initialFormState)
-      setErrors({})
-      setIsDirty(false)
-      onClose()
+      try {
+        const response = await customerApi.addCustomer(formData)
+        console.log('API Response:', response)
+
+        // Reset form state
+        setFormData(initialFormState)
+        setErrors({})
+        setIsDirty(false)
+        onClose()
+      } catch (apiError) {
+        console.error('API Error:', apiError)
+        // Optionally show an error message to the user
+        alert(`Failed to add customer: ${apiError.message}`)
+      }
     } catch (error) {
-      const newErrors = {}
-      error.inner.forEach(err => {
-        newErrors[err.path] = err.message
-      })
-      setErrors(newErrors)
+      console.error('Unexpected Error:', error)
     }
   }
 
   const handleFollowUpUpdate = (entries) => {
     setFormData(prev => ({
-      ...prev,
-      follow_up_entries: entries
+      ...prev
     }))
     setIsDirty(true)
   }
@@ -245,7 +266,7 @@ export default function CustomerModal({ open, onClose, handleSubmitData }) {
             <CustomerCareSection
               formData={formData}
               errors={errors}
-              onFollowUpUpdate={handleFollowUpUpdate}
+              onCommentsUpdate={handleCommentsUpdate}
             />
           </Grid>
         </DialogContent>

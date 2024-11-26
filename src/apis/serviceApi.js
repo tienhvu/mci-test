@@ -22,6 +22,8 @@ const serviceApi = {
         throw new Error('Failed to add new option')
       }
       const data = await response.json()
+      console.log('Data service: ', data);
+      
       return data
     } catch (error) {
       console.error('Error adding service:', error)

@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useState } from 'react'
-
+import { Checkbox } from '@mui/material'
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginTop: 4,
   maxHeight: '200px',
@@ -76,9 +76,10 @@ const AddButton = styled(Button)({
 
 const AddContainer = styled(Box)({
   padding: '8px 12px',
-  borderTop: '1px solid #E8EAED',
+  borderTop: '1px solid #E8EAED'
 
 })
+
 
 const CustomDropdown = ({
   open,
@@ -87,14 +88,36 @@ const CustomDropdown = ({
   selectedValue,
   onSelect,
   onAddNew,
-  onClose
+  onClose,
+  multiple = false
 }) => {
   const [newValue, setNewValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  const isSelected = (value) => {
+    if (multiple) {
+      return Array.isArray(selectedValue) && selectedValue.includes(value)
+    }
+    return selectedValue === value
+  }
+
   const handleSelect = (value) => {
-    onSelect(value)
-    onClose()
+    if (multiple) {
+      // Xử lý logic chọn nhiều giá trị
+      const currentValues = Array.isArray(selectedValue) ? selectedValue : []
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value]
+
+      onSelect(newValues)
+
+      if (!multiple) {
+        onClose()
+      }
+    } else {
+      onSelect(value)
+      onClose()
+    }
   }
 
   const handleAddNew = async () => {
@@ -128,17 +151,26 @@ const CustomDropdown = ({
           {options.map((option) => (
             <StyledListItem
               key={option.value}
-              onClick={() => onSelect(option.value)}
-              selected={option.value === selectedValue}
+              onClick={() => handleSelect(option.value)}
+              selected={multiple
+                ? (Array.isArray(selectedValue) && selectedValue.includes(option.value))
+                : (option.value === selectedValue)
+              }
               disablePadding
             >
+              {multiple && (
+                <Checkbox
+                  checked={Array.isArray(selectedValue) && selectedValue.includes(option.value)}
+                  onChange={() => handleSelect(option.value)}
+                />
+              )}
               <StyledListItemText primary={option.label} />
             </StyledListItem>
           ))}
           {onAddNew && (
             <AddContainer width={'100%'}>
-              <Grid container width={'100%'} spacing={1} size={{ xs: 12 }} sx={{ display: 'flex', alignItem:'center' }}>
-                <Grid size={{ xs: 7 }} >
+              <Grid container width={'100%'} spacing={1} size={{ xs: 12 }} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Grid size={{ xs: 7 }}>
                   <StyledTextField
                     fullWidth
                     placeholder="Nhập dữ liệu"
@@ -147,9 +179,9 @@ const CustomDropdown = ({
                     disabled={isLoading}
                   />
                 </Grid>
-                <Grid size={{ xs: 3 }} sx={{ display:'flex', alignItems: 'center' }}>
+                <Grid size={{ xs: 3 }} sx={{ display: 'flex', alignItems: 'center' }}>
                   <AddButton
-                    startIcon={<AddIcon/>}
+                    startIcon={<AddIcon />}
                     onClick={handleAddNew}
                     disabled={!newValue.trim() || isLoading}
                   >
@@ -164,5 +196,4 @@ const CustomDropdown = ({
     </Popper>
   )
 }
-
 export default CustomDropdown

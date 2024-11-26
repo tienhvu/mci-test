@@ -1,12 +1,11 @@
-import { useEffect } from 'react'
-import React, { useState, useRef } from 'react'
-import {
-  TextField,
-  FormControl,
-  Typography,
-  ClickAwayListener
-} from '@mui/material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import {
+  ClickAwayListener,
+  FormControl,
+  TextField,
+  Typography
+} from '@mui/material'
+import React, { useRef, useState } from 'react'
 import CustomDropdown from './../../dashboard/features/customer-management/components/create-update-customer-modal/components/DropDown'
 
 export const CustomSelect = ({
@@ -16,6 +15,7 @@ export const CustomSelect = ({
   onChange,
   options = [],
   onAddNewOption,
+  multiple = false,
   icon: Icon = ArrowDropDownIcon,
   ...props
 }) => {
@@ -24,10 +24,19 @@ export const CustomSelect = ({
 
   const handleOpen = () => setIsOpen(true)
   const handleClose = () => setIsOpen(false)
-
   const handleSelect = (selectedValue) => {
-    onChange(selectedValue)
-    handleClose()
+    if (multiple) {
+      const currentValues = Array.isArray(value) ? value : [];
+      const isAlreadySelected = currentValues.includes(selectedValue);
+      if (isAlreadySelected) {
+        onChange(currentValues.filter(v => v !== selectedValue));
+      } else {
+        onChange([...currentValues, selectedValue]);
+      }
+    } else {
+      onChange(selectedValue);
+      handleClose();
+    }
   }
 
   const handleAddNew = async (newValue) => {
@@ -43,7 +52,9 @@ export const CustomSelect = ({
   }
 
   const selectedOption = options.find(opt => opt.value === value)
-
+  const displayValue = multiple && Array.isArray(value)
+    ? value.map(v => options.find(opt => opt.value === v)?.label).filter(Boolean).join(', ')
+    : selectedOption?.label || ''
   return (
     <ClickAwayListener onClickAway={() => setIsOpen(false)}>
       <FormControl fullWidth >
@@ -110,6 +121,7 @@ export const CustomSelect = ({
           onSelect={handleSelect}
           onAddNew={onAddNewOption ? handleAddNew : undefined}
           onClose={handleClose}
+          multiple={multiple}
         />
       </FormControl>
     </ClickAwayListener>

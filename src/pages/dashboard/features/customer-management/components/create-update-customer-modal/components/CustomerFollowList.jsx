@@ -1,99 +1,85 @@
-import React, { useState } from 'react'
+import ControlPointIcon from '@mui/icons-material/ControlPoint'
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack
+  TableRow
 } from '@mui/material'
-import { Add as AddIcon } from '@mui/icons-material'
+import React, { useEffect, useState } from 'react'
+import { useStatusContext } from '../../../../../../../context/status_context'
 import { CustomInput } from './../../../../../components/CustomInput'
 import { CustomSelect } from './../../../../../components/CustomSelect'
-import calendarIcon from './../../../../../../../assets/calendar.png'
-import ControlPointIcon from '@mui/icons-material/ControlPoint'
 
-const AddNewEntryDialog = ({ open, onClose, onAdd }) => {
-  const [newEntry, setNewEntry] = useState({
-    date: '',
-    result: '',
-    status: ''
+const AddNewCommentDialog = ({ open, onClose, onAdd, statusOptions }) => {
+  const [newComment, setNewComment] = useState({
+    time: '',
+    title: '',
+    status_id: ''
   })
 
-  const statusOptions = [
-    { value: 'Gọi lại lần sau', label: 'Gọi lại lần sau' },
-    { value: 'Yêu cầu trải nghiệm', label: 'Yêu cầu trải nghiệm' }
-  ]
-
   const handleAdd = () => {
-    if (newEntry.date && newEntry.result && newEntry.status) {
-      onAdd(newEntry)
-      setNewEntry({
-        date: '',
-        result: '',
-        status: ''
-      })
+    if (newComment.time && newComment.title && newComment.status_id) {
       onClose()
+      setNewComment({
+        time: '',
+        title: '',
+        status_id: ''
+      })
     }
   }
 
-  const handleClose = () => {
-    setNewEntry({
-      date: '',
-      result: '',
-      status: ''
-    })
-    onClose()
-  }
-
-  const handleStatusChange = (selected) => {
-    setNewEntry({ ...newEntry, status: selected.value })
-  }
-
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-    >
-      <DialogTitle>Thêm kết quả chăm sóc mới</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>Thêm ghi chú mới</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 2 }}>
+          {/* Input date */}
           <CustomInput
             label="Ngày"
             required
-            type="date"
-            value={newEntry.date}
-            onChange={(e) => setNewEntry({ ...newEntry, date: e.target.value })}
+            type="datetime-local"
+            value={newComment.time}
+            onChange={(e) => setNewComment(prev => ({
+              ...prev,
+              time: e.target.value
+            }))}
             size="small"
-            icon={calendarIcon}
             fullWidth
           />
 
+          {/* Input title */}
           <CustomInput
-            label="Kết quả chăm sóc"
+            label="Nội dung ghi chú"
             required
-            value={newEntry.result}
-            onChange={(e) => setNewEntry({ ...newEntry, result: e.target.value })}
-            placeholder="Nhập kết quả chăm sóc"
+            value={newComment.title}
+            onChange={(e) => setNewComment(prev => ({
+              ...prev,
+              title: e.target.value
+            }))}
+            placeholder="Nhập nội dung ghi chú"
             size="small"
             fullWidth
           />
 
+          {/* Select status */}
           <CustomSelect
             label="Trạng thái"
             required
-            value={newEntry.status}
-            onChange={handleStatusChange}
+            value={newComment.status_id}
+            onChange={(selectedValue) => setNewComment(prev => ({
+              ...prev,
+              status_id: selectedValue
+            }))}
             options={statusOptions}
             placeholder="Chọn trạng thái"
             size="small"
@@ -102,17 +88,13 @@ const AddNewEntryDialog = ({ open, onClose, onAdd }) => {
         </Stack>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button
-          onClick={handleClose}
-          variant="outlined"
-          color="inherit"
-        >
+        <Button onClick={onClose} variant="outlined" color="inherit">
           Hủy
         </Button>
         <Button
           onClick={handleAdd}
           variant="contained"
-          disabled={!newEntry.date || !newEntry.result || !newEntry.status}
+          disabled={!newComment.time || !newComment.title || !newComment.status_id}
         >
           Lưu
         </Button>
@@ -121,94 +103,82 @@ const AddNewEntryDialog = ({ open, onClose, onAdd }) => {
   )
 }
 
-const CustomerFollowUpList = () => {
-  const [entries, setEntries] = useState([
-    {
-      id: 1,
-      date: '2022-04-28',
-      result: 'Khách hàng hẹn gọi lại sau',
-      status: 'Gọi lại lần sau'
-    },
-    {
-      id: 2,
-      date: '2022-04-30',
-      result: 'Khách yêu cầu trải nghiệm',
-      status: 'Yêu cầu trải nghiệm'
-    }
-  ])
+// Component for the comments list
+const CustomerFollowUpList = ({ initialComments = [], onCommentsUpdate }) => {
+  const { statusOptions } = useStatusContext()
+
+  // State for the comments list
+  const [comments, setComments] = useState(
+    initialComments.map((comment, index) => ({
+      ...comment,
+      id: index + 1
+    }))
+  )
 
   const [openDialog, setOpenDialog] = useState(false)
 
-  const statusOptions = [
-    { value: 'Gọi lại lần sau', label: 'Gọi lại lần sau' },
-    { value: 'Yêu cầu trải nghiệm', label: 'Yêu cầu trải nghiệm' }
-  ]
+  useEffect(() => {
+    onCommentsUpdate(comments)
+  }, [comments, onCommentsUpdate])
 
-  const handleUpdateEntry = (id, field, value) => {
-    setEntries(entries.map(entry =>
-      entry.id === id ? { ...entry, [field]: value } : entry
-    ))
+  const handleUpdateComment = (id, field, value) => {
+    const updatedComments = comments.map(comment =>
+      comment.id === id ? { ...comment, [field]: value } : comment
+    )
+    setComments(updatedComments)
   }
 
-  const handleStatusUpdate = (id, selected) => {
-    handleUpdateEntry(id, 'status', selected.value)
-  }
+  const handleAddNewComment = (newComment) => {
+    const formattedTime = new Date(newComment.time).toISOString()
 
-  const handleAddNewEntry = (newEntry) => {
-    setEntries([
-      ...entries,
-      {
-        id: entries.length + 1,
-        ...newEntry
-      }
-    ])
+    // Add new comment with the formatted time
+    setComments([...comments, { id: comments.length + 1, time: formattedTime, ...newComment }])
   }
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid #bdbdbd', borderBottom: 'none', borderRadius: '10px 10px 0 0'}}>
+      <TableContainer component={Paper} sx={{
+        boxShadow: 'none',
+        border: '1px solid #bdbdbd',
+        borderBottom: 'none',
+        borderRadius: '10px 10px 0 0'
+      }}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f2f2f2' }}>
-              <TableCell width={80} sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Lần</TableCell>
-              <TableCell width={200} sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Ngày</TableCell>
-              <TableCell sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Kết quả chăm sóc</TableCell>
-              <TableCell width={200} sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Cập nhật trạng thái</TableCell>
+              <TableCell width={80} sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>#</TableCell>
+              <TableCell width={200} sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Thời gian</TableCell>
+              <TableCell sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Nội dung</TableCell>
+              <TableCell width={200} sx={{ fontWeight: 400, fontSize: '14px', color: '#2d2d2d' }}>Trạng thái</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {entries.map((entry, index) => (
-              <TableRow
-                key={entry.id}
-                sx={{
-                  '& td': {
-                    borderBottom: index === entries.length - 1 ? 'none' : 'block'
-                  }
-                }}
-              >
-                <TableCell>{entry.id}</TableCell>
+            {comments.map((comment, index) => (
+              <TableRow key={comment.id} sx={{
+                '& td': { borderBottom: index === comments.length - 1 ? 'none' : 'block' }
+              }}>
+                <TableCell>{comment.id}</TableCell>
                 <TableCell>
                   <CustomInput
-                    type="date"
-                    value={entry.date}
-                    onChange={(e) => handleUpdateEntry(entry.id, 'date', e.target.value)}
+                    type="datetime-local"
+                    value={comment.time}
+                    onChange={(e) => handleUpdateComment(comment.id, 'time', e.target.value)}
                     fullWidth
                     size="small"
-                    icon={calendarIcon}
                   />
                 </TableCell>
                 <TableCell>
                   <CustomInput
-                    value={entry.result}
-                    onChange={(e) => handleUpdateEntry(entry.id, 'result', e.target.value)}
+                    value={comment.title}
+                    onChange={(e) => handleUpdateComment(comment.id, 'title', e.target.value)}
                     fullWidth
                     size="small"
                   />
                 </TableCell>
                 <TableCell>
                   <CustomSelect
-                    value={entry.status}
-                    onChange={(selected) => handleStatusUpdate(entry.id, selected)}
+                    value={comment.status_id}
+                    onChange={(selectedValue) => handleUpdateComment(comment.id, 'status_id', selectedValue)} // Cập nhật status_id
                     options={statusOptions}
                     fullWidth
                     size="small"
@@ -217,11 +187,16 @@ const CustomerFollowUpList = () => {
               </TableRow>
             ))}
           </TableBody>
-
         </Table>
       </TableContainer>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, border: '1px dashed #828282' }}>
+      {/* Button to add a new comment */}
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        mb: 2,
+        border: '1px dashed #828282'
+      }}>
         <Button
           variant="text"
           startIcon={<ControlPointIcon sx={{ width: '28px', height: '28px' }} />}
@@ -231,23 +206,20 @@ const CustomerFollowUpList = () => {
             fontSize: '16px',
             fontWeight: 400,
             padding: '16px 24px',
-            '&:hover': {
-              fontWeight: 'bold',
-              transform: 'scale(1.05)',
-              transition: 'all 0.3s ease'
-            }
+            '&:hover': { fontWeight: 'bold', transform: 'scale(1.05)', transition: 'all 0.3s ease' }
           }}
           onClick={() => setOpenDialog(true)}
         >
-    Thêm
+          Thêm
         </Button>
       </Box>
 
-
-      <AddNewEntryDialog
+      {/* Add new comment dialog */}
+      <AddNewCommentDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
-        onAdd={handleAddNewEntry}
+        onAdd={handleAddNewComment}
+        statusOptions={statusOptions}
       />
     </>
   )

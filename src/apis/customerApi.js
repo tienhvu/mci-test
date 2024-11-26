@@ -12,22 +12,25 @@ const customerApi = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`
         },
-        body: JSON.stringify(customerData),
+        body: JSON.stringify(customerData)
       })
 
       if (!response.ok) {
         const errorData = await response.json()
+        console.error('API Error:', errorData);
+
         throw new Error(errorData.message || 'Failed to add customer')
       }
 
       const data = await response.json()
+      console.log('Data: ', data)
       return data
     } catch (error) {
       console.error('Error adding customer:', error)
       throw error
     }
-  },
+  }
 }
 export default customerApi

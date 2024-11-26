@@ -1,15 +1,15 @@
 import * as yup from 'yup'
 export const customerSchema = yup.object().shape({
-  fullName: yup
+  full_name: yup
     .string()
     .required('Vui lòng nhập họ tên')
     .min(2, 'Họ tên phải có ít nhất 2 ký tự'),
-  birthDate: yup
+  date_of_birth: yup
     .date()
     .nullable()
     .required('Vui lòng chọn ngày sinh')
     .max(new Date(), 'Ngày sinh không thể lớn hơn ngày hiện tại'),
-  phone: yup
+  phone_number: yup
     .string()
     .required('Vui lòng nhập số điện thoại')
     .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')

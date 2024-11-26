@@ -4,51 +4,15 @@ import iconCustomer from './../../../../assets/icon-KH.png'
 import Filter from './components/Filter'
 import Profile from './components/Profile'
 import ResultTable from './components/result-table/ResultTable'
-import { useState} from 'react'
+import { useState } from 'react'
 import CustomerModal from './components/create-update-customer-modal/CreateUpdateCustomer'
 
 export default function CustomerManagement() {
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    gender: '',
-    birthDate: null,
-    source: '',
-    status: '',
-    phone: '',
-    email: '',
-    socialNetwork: '',
-    socialLink: '',
-    province: '',
-    district: '',
-    address: '',
-    careDate: null,
-    careResult: '',
-    careStatus: ''
-  });
+  const [open, setOpen] = useState(false)
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
 
-  const handleChange = (field) => (event) => {
-    setFormData({
-      ...formData,
-      [field]: event.target.value
-    });
-  };
-
-  const handleDateChange = (field) => (date) => {
-    setFormData({
-      ...formData,
-      [field]: date
-    });
-  };
-
-  const handleSubmit = () => {
-    // Xử lý logic gửi dữ liệu
-    console.log('Submitted data:', formData);
-    handleClose();
-  };
   return (
     <Container disableGutters maxWidth={false} sx={{ backgroundColor: '#f9f9f9' }}>
       <Grid
@@ -123,17 +87,11 @@ export default function CustomerManagement() {
             <CustomerModal
               open={open}
               onClose={handleClose}
-              formData={formData}
-              onSubmit={handleSubmit}
-              onChangeField={handleChange}
-              onChangeDateField={handleDateChange}
             />
           </Grid>
         </Grid>
-
         <ResultTable />
       </Grid>
     </Container>
   )
 }
-

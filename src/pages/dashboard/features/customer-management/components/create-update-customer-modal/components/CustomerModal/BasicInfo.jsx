@@ -1,8 +1,8 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
-import Grid from '@mui/material/Grid2'; // Giữ nguyên Grid2 như trong mã của bạn
+import Grid from '@mui/material/Grid2'
 import React, { useState } from 'react'
 import sourceApi from '../../../../../../../../apis/sourcesApi'
-import statusApi from '../../../../../../../../apis/statusApi'
+import { useStatusContext } from '../../../../../../../../context/status_context'
 import { CustomInput } from '../../../../../../components/CustomInput'
 import { CustomSelect } from '../../../../../../components/CustomSelect'
 import GenderRadioGroup from '../GenderRadioGroup'
@@ -14,9 +14,10 @@ const BasicInfoSection = ({
   onDateChange
 }) => {
   const [sources, setSources] = useState([])
-  const [status, setStatus] = useState([])
+  const { statusOptions, addNewStatus } = useStatusContext()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
   const handleAddNewSource = async (newTitle) => {
     try {
       const response = await sourceApi.addOption(newTitle)
@@ -33,22 +34,6 @@ const BasicInfoSection = ({
     }
   }
 
-  const handleAddNewStatus = async (newTitle) => {
-    try {
-      const response = await statusApi.addOption(newTitle)
-      const newStatus = {
-        value: response.id,
-        label: response.title
-      }
-      setStatus(prevStatus => [...prevStatus, newStatus])
-      onSelectChange('status')(newStatus.value)
-      return newStatus
-    } catch (error) {
-      console.error('Error adding new status:', error)
-      throw error
-    }
-  }
-
   return (
     <>
       <Grid container spacing={3} sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', pt: '20px' }}>
@@ -59,8 +44,8 @@ const BasicInfoSection = ({
             value={formData.full_name}
             onChange={onChangeField('full_name')}
             placeholder="Nhập họ tên khách hàng"
-            error={!!errors.fullName}
-            helperText={errors.fullName}
+            error={!!errors.full_name}
+            helperText={errors.full_name}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 5, lg: 4 }}>
@@ -68,15 +53,16 @@ const BasicInfoSection = ({
             value={formData.gender}
             onChange={onChangeField('gender')}
           />
+
         </Grid>
         <Grid size={{ xs: 12, md: 5, lg: 4 }}>
           <CustomInput
             label="Ngày sinh"
             type="date"
             value={formData.date_of_birth || ''}
-            onChange={onDateChange('date_of_birth')}
-            error={!!errors.birthDate}
-            helperText={errors.birthDate}
+            onChange={(e) => onDateChange('date_of_birth')(e.target.value)}
+            error={!!errors.date_of_birth}
+            helperText={errors.date_of_birth}
             icon={<CalendarTodayIcon sx={{ fontSize: '14px', color: 'rgba(0,0,0,0.56)' }} />}
           />
         </Grid>
@@ -101,8 +87,8 @@ const BasicInfoSection = ({
               required
               value={formData.status}
               onChange={onSelectChange('status')}
-              options={status}
-              onAddNewOption={handleAddNewStatus}
+              options={statusOptions}
+              onAddNewOption={addNewStatus}
               disabled={loading}
             />
           </Grid>

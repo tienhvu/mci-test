@@ -48,15 +48,16 @@ const DetailedInfoSection = ({
         value: response.id,
         label: response.title
       }
-      setService(prevSercice => [...prevSercice, newService])
-      onSelectChange('service')(newService.value)
+      setService(prevService => [...prevService, newService])
+
+      const currentServices = formData.service || [];
+      onSelectChange('service')([...currentServices, newService.value]);
       return newService
     } catch (error) {
       console.error('Error adding new service:', error)
       throw error
     }
   }
-
 
   return (
     <>
@@ -69,9 +70,11 @@ const DetailedInfoSection = ({
             <CustomSelect
               label="Sản phẩm quan tâm"
               required
+              // multiple={true}
               value={formData.service}
               onChange={onSelectChange('service')}
               options={service}
+              multiple={true}
               onAddNewOption={handleAddNewService}
             />
 
@@ -80,8 +83,6 @@ const DetailedInfoSection = ({
               value={formData.note}
               onChange={onChangeField('note')}
               placeholder=""
-              error={!!errors.note}
-              helperText={errors.note}
               sx={{ height: '47px' }}
             />
           </Grid>
@@ -112,8 +113,6 @@ const DetailedInfoSection = ({
               value={formData.address}
               onChange={onChangeField('address')}
               placeholder="Nhập địa chỉ chi tiết"
-              error={!!errors.address}
-              helperText={errors.address}
             />
           </Grid>
 
